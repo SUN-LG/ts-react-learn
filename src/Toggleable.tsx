@@ -1,13 +1,12 @@
 import React, { Component, ComponentType, MouseEvent, ReactNode } from 'react';
-import { Constructor, isFunction } from './utils';
+import { Constructor, getComponentName, isFunction } from './utils';
 
-interface AnyProps {[name: string]: any; }
-interface DefaultProps<P extends object = object> {props: P; }
+interface DefaultProps<P extends object = object> {props: P; show: boolean; }
 
 const initialState = {
   show: false
 };
-const defaultProps: DefaultProps = {props: {}};
+const defaultProps: DefaultProps = {props: {}, ...initialState};
 
 
 type RenderCB = (args: ToggleableComponentProps) => JSX.Element;
@@ -17,23 +16,27 @@ export type ToggleableComponentProps<P extends object = object> = {
 } & P;
 
 type State = Readonly<typeof initialState>;
-type Props<P extends object = object> = Partial<{
+export type Props<P extends object = object> = Partial<{
   render: RenderCB;
   children: RenderCB | ReactNode;
   component: ComponentType<ToggleableComponentProps<P | {}>>;
 } & DefaultProps<P>>;
 
-// type aaaa = {show: boolean} & {}
-// const A: React.FC = () => (<div></div>);
-// const B: ComponentType<{show: boolean; toggle: string}> = A;
-
 
 export class Toggleable<T extends {} = {}> extends Component<Props<T>, State> {
+  public static readonly displayName: 'Toggleable';
   public static readonly defaultProps: Props = defaultProps;
   public static ofType<T extends object>() {
     return Toggleable as Constructor<Toggleable<T>>;
   }
-  public readonly state: State = initialState;
+  public readonly state: State = {show: this.props.show!};
+
+  public componentWillReceiveProps(nextProps: Props<T>) {
+    const currentProps = this.props;
+    if (nextProps.show !== currentProps.show) {
+      this.setState({show: Boolean(nextProps.show)});
+    }
+  }
 
   public render() {
     const {render, children, component: InjectedComponent, props} = this.props;

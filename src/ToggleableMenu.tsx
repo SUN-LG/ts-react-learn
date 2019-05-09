@@ -1,7 +1,8 @@
 import React, { FC } from 'react';
 import Toggleable, { ToggleableComponentProps } from './Toggleable';
+import { withToggleable } from './WithToggleableHOC';
 
-interface MenuItemProps {title: string; }
+interface MenuItemProps {title: string;}
 
 const ToggleableA = Toggleable.ofType<MenuItemProps>();
 
@@ -15,13 +16,17 @@ const MenuItem: FC<MenuItemProps & ToggleableComponentProps> = ({title, show, to
 
 interface Props {
   title: string;
+  show?: boolean;
 }
 
-const ToggleableMenu: FC<Props> = ({title, children}) => (
+const ToggleableMenu: FC<Props> = ({title, children, show}) => (
   <ToggleableA
     component={MenuItem}
-    props={{title, aa: 'aaa'}}
+    props={{title}}
+    show={show}
   >
     {children}
   </ToggleableA>
 );
+
+const ToggleableMenuViaHoc = withToggleable(MenuItem);
